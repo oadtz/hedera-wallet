@@ -1,6 +1,7 @@
 export type LoggedInInfo = {
-  hederaAccount?: {
+  hederaAccount: {
     accountId: string;
-    publicKey: string;
+    privateKey: string;
+    testNet: boolean;
   };
 };

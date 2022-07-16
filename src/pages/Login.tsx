@@ -1,24 +1,40 @@
 import { useState } from "react";
 import { useMutation } from "react-query";
+import { useNavigate } from "react-router-dom";
+import { useAppContext } from "../context/AppContext";
 import { getBalances } from "../services/hedera";
 
 const Login: React.FunctionComponent = () => {
+  const appContext = useAppContext();
+  const navigate = useNavigate();
+
   const [hederaAccount, setHederaAccount] = useState({
     accountId: "",
     privateKey: "",
+    testNet: true,
   });
-  const [forTestNet, setForTestNet] = useState(true);
-  const { mutateAsync: logIn, error } = useMutation(() =>
-    getBalances(hederaAccount.accountId, hederaAccount.privateKey, forTestNet)
+
+  const { mutateAsync: logIn } = useMutation(() =>
+    getBalances(
+      hederaAccount.accountId,
+      hederaAccount.privateKey,
+      hederaAccount.testNet
+    )
   );
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
 
-    await logIn();
+    const balances = await logIn();
+
+    if (balances) {
+      appContext.setLoggedInInfo({ hederaAccount });
+
+      navigate("/");
+    }
   };
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | boolean) => {
     setHederaAccount({
       ...hederaAccount,
       [field]: value,
@@ -37,7 +53,6 @@ const Login: React.FunctionComponent = () => {
           Sign in to your wallet
         </h2>
       </div>
-      {JSON.stringify(error)}
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
@@ -89,15 +104,17 @@ const Login: React.FunctionComponent = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <input
-                  id="remember-me"
-                  name="remember-me"
+                  id="testNet"
+                  name="testNet"
                   type="checkbox"
                   className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                  checked={forTestNet}
-                  onChange={(e) => setForTestNet(e.target.checked)}
+                  checked={hederaAccount.testNet}
+                  onChange={(e) =>
+                    handleInputChange("testNet", e.target.checked)
+                  }
                 />
                 <label
-                  htmlFor="remember-me"
+                  htmlFor="testNet"
                   className="ml-2 block text-sm text-gray-900"
                 >
                   Testnet Account

@@ -14,14 +14,16 @@ export const getBalances = async (
 ) => {
   client = forTestNet ? HederaClient.forTestnet() : HederaClient.forMainnet();
 
-  client.setOperator(
-    AccountId.fromString(accountId),
-    PrivateKey.fromString(privateKey)
-  );
+  if (accountId && privateKey) {
+    client.setOperator(
+      AccountId.fromString(accountId),
+      PrivateKey.fromString(privateKey)
+    );
 
-  const query = new AccountBalanceQuery({ accountId });
+    const query = new AccountBalanceQuery({ accountId });
 
-  const balances = await query.execute(client);
+    const balances = await query.execute(client);
 
-  return balances;
+    return balances;
+  }
 };
