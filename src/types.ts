@@ -1,7 +1,9 @@
-export type LoggedInInfo = {
-  hederaAccount: {
-    accountId: string;
-    privateKey: string;
-    testNet: boolean;
-  };
+export type Wallet = {
+  accounts: Record<string, HederaAccount>;
+};
+
+export type HederaAccount = {
+  accountId: string;
+  privateKey: string;
+  testNet: boolean;
 };

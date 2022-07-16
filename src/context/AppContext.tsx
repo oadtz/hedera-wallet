@@ -1,10 +1,10 @@
 import React, { useContext, useState } from "react";
-import { LoggedInInfo } from "../types";
+import { HederaAccount, Wallet } from "../types";
 
 interface IAppContextProps {
-  loggedInInfo: LoggedInInfo;
-  setLoggedInInfo: (info: LoggedInInfo) => void;
-  clearLoggedInInfo: () => void;
+  wallet: Wallet;
+  addAccount: (account: HederaAccount) => void;
+  clearAccounts: () => void;
 }
 
 const Context = React.createContext({} as IAppContextProps);
@@ -12,18 +12,31 @@ const Context = React.createContext({} as IAppContextProps);
 const AppContext: React.FunctionComponent<{
   children: React.ReactNode;
 }> = (props) => {
-  const [loggedInInfo, setLoggedInInfo] = useState({} as LoggedInInfo);
+  const [wallet, setWallet] = useState({
+    accounts: {},
+  });
 
-  const clearLoggedInInfo = () => {
-    setLoggedInInfo({} as LoggedInInfo);
+  const clearAccounts = () => {
+    setWallet({
+      accounts: {},
+    });
+  };
+
+  const addAccount = (account: HederaAccount) => {
+    setWallet({
+      accounts: {
+        ...wallet.accounts,
+        [account.accountId.toString()]: account,
+      },
+    });
   };
 
   return (
     <Context.Provider
       value={{
-        loggedInInfo,
-        setLoggedInInfo,
-        clearLoggedInInfo,
+        wallet,
+        addAccount,
+        clearAccounts,
       }}
     >
       {props.children}

@@ -1,15 +1,16 @@
 import { useState } from "react";
 import { useMutation } from "react-query";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAppContext } from "../context/AppContext";
 import { getBalances } from "../services/hedera";
 
 const Login: React.FunctionComponent = () => {
   const appContext = useAppContext();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [hederaAccount, setHederaAccount] = useState({
-    accountId: "",
+    accountId: searchParams.get("accountId") || "",
     privateKey: "",
     testNet: true,
   });
@@ -28,9 +29,9 @@ const Login: React.FunctionComponent = () => {
     const balances = await logIn();
 
     if (balances) {
-      appContext.setLoggedInInfo({ hederaAccount });
+      appContext.addAccount(hederaAccount);
 
-      navigate("/");
+      navigate(`/accounts/${hederaAccount.accountId}`);
     }
   };
 

@@ -5,14 +5,14 @@ import {
   PrivateKey,
 } from "@hashgraph/sdk";
 
-let client: HederaClient;
-
 export const getBalances = async (
   accountId: string,
   privateKey: string,
   forTestNet: boolean = false
 ) => {
-  client = forTestNet ? HederaClient.forTestnet() : HederaClient.forMainnet();
+  const client = forTestNet
+    ? HederaClient.forTestnet()
+    : HederaClient.forMainnet();
 
   if (accountId && privateKey) {
     client.setOperator(

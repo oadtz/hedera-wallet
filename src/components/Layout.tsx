@@ -7,15 +7,15 @@ interface IHomeProps {
 }
 
 const Layout: React.FunctionComponent<IHomeProps> = ({ children }) => {
-  const appContext = useAppContext();
+  const { wallet } = useAppContext();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!appContext.loggedInInfo.hederaAccount?.accountId) {
+    if (Object.keys(wallet.accounts).length === 0) {
       navigate("/login");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appContext.loggedInInfo.hederaAccount?.accountId]);
+  }, [wallet]);
 
   return <>{children}</>;
 };
