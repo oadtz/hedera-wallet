@@ -3,6 +3,7 @@ import {
   AccountId,
   Client,
   PrivateKey,
+  TokenInfoQuery,
 } from "@hashgraph/sdk";
 
 export const getClient = (
@@ -26,4 +27,12 @@ export const getBalances = async (client: Client, accountId: string) => {
   const balances = await query.execute(client);
 
   return balances;
+};
+
+export const getTokenInfo = async (client: Client, tokenId: string) => {
+  const query = new TokenInfoQuery({ tokenId });
+
+  const token = await query.execute(client);
+
+  return token;
 };

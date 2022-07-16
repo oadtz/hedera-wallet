@@ -1,9 +1,10 @@
 import React, { useContext, useState } from "react";
-import { HederaAccount, Wallet } from "../types";
+import { HederaAccount, HederaToken, Wallet } from "../types";
 
 interface IAppContextProps {
   wallet: Wallet;
   addAccount: (account: HederaAccount) => void;
+  addToken: (token: HederaToken) => void;
   clearAccounts: () => void;
 }
 
@@ -14,19 +15,32 @@ const AppContext: React.FunctionComponent<{
 }> = (props) => {
   const [wallet, setWallet] = useState({
     accounts: {},
+    tokens: {},
   });
 
   const clearAccounts = () => {
     setWallet({
+      ...wallet,
       accounts: {},
     });
   };
 
   const addAccount = (account: HederaAccount) => {
     setWallet({
+      ...wallet,
       accounts: {
         ...wallet.accounts,
         [account.accountId.toString()]: account,
+      },
+    });
+  };
+
+  const addToken = (token: HederaToken) => {
+    setWallet({
+      ...wallet,
+      tokens: {
+        ...wallet.tokens,
+        [token.tokenId.toString()]: token,
       },
     });
   };
@@ -37,6 +51,7 @@ const AppContext: React.FunctionComponent<{
         wallet,
         addAccount,
         clearAccounts,
+        addToken,
       }}
     >
       {props.children}
