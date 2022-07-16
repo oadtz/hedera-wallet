@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { Client } from "@hashgraph/sdk";
+import { useEffect, useState } from "react";
 import { useMutation } from "react-query";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import ErrorMessage from "../components/ErrorMessage";
 import { useAppContext } from "../context/AppContext";
-import { getBalances } from "../services/hedera";
+import { getBalances, getClient } from "../services/hedera";
 
 const Login: React.FunctionComponent = () => {
   const appContext = useAppContext();
@@ -14,24 +16,31 @@ const Login: React.FunctionComponent = () => {
     privateKey: "",
     testNet: true,
   });
+  const [error, setError] = useState();
 
-  const { mutateAsync: logIn } = useMutation(() =>
-    getBalances(
-      hederaAccount.accountId,
-      hederaAccount.privateKey,
-      hederaAccount.testNet
-    )
+  const { mutateAsync: logIn, error: logInError } = useMutation<any, any, any>(
+    (client: Client) => getBalances(client, hederaAccount.accountId)
   );
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
 
-    const balances = await logIn();
+    try {
+      const accountClient = getClient(
+        hederaAccount.accountId,
+        hederaAccount.privateKey,
+        hederaAccount.testNet
+      );
 
-    if (balances) {
-      appContext.addAccount(hederaAccount);
+      const balances = await logIn(accountClient);
 
-      navigate(`/accounts/${hederaAccount.accountId}`);
+      if (balances) {
+        appContext.addAccount({ ...hederaAccount, client: accountClient });
+
+        navigate(`/accounts/${hederaAccount.accountId}`);
+      }
+    } catch (e: any) {
+      setError(e.toString());
     }
   };
 
@@ -41,6 +50,14 @@ const Login: React.FunctionComponent = () => {
       [field]: value,
     });
   };
+
+  useEffect(() => {
+    if (logInError) {
+      setError(logInError?.message || logInError?.toString());
+    } else {
+      setError(undefined);
+    }
+  }, [logInError]);
 
   return (
     <div className="min-h-full flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -56,6 +73,7 @@ const Login: React.FunctionComponent = () => {
       </div>
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          {!!error && <ErrorMessage message="Error" details={[error]} />}
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label

@@ -1,29 +1,29 @@
 import {
   AccountBalanceQuery,
   AccountId,
-  Client as HederaClient,
+  Client,
   PrivateKey,
 } from "@hashgraph/sdk";
 
-export const getBalances = async (
+export const getClient = (
   accountId: string,
   privateKey: string,
-  forTestNet: boolean = false
-) => {
-  const client = forTestNet
-    ? HederaClient.forTestnet()
-    : HederaClient.forMainnet();
+  testNet: boolean = false
+): Client => {
+  const client = testNet ? Client.forTestnet() : Client.forMainnet();
 
-  if (accountId && privateKey) {
-    client.setOperator(
-      AccountId.fromString(accountId),
-      PrivateKey.fromString(privateKey)
-    );
+  client.setOperator(
+    AccountId.fromString(accountId),
+    PrivateKey.fromString(privateKey)
+  );
 
-    const query = new AccountBalanceQuery({ accountId });
+  return client;
+};
 
-    const balances = await query.execute(client);
+export const getBalances = async (client: Client, accountId: string) => {
+  const query = new AccountBalanceQuery({ accountId });
 
-    return balances;
-  }
+  const balances = await query.execute(client);
+
+  return balances;
 };

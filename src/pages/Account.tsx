@@ -11,16 +11,12 @@ const Account: React.FunctionComponent = () => {
   const { accountId } = useParams();
 
   const { data: balances } = useQuery(
-    ["account-balance", { accountId }],
+    ["account-balances", { accountId }],
     () => {
       if (accountId && accountId in wallet.accounts) {
         const currentAccount = wallet.accounts[accountId];
 
-        return getBalances(
-          currentAccount.accountId,
-          currentAccount.privateKey,
-          currentAccount.testNet
-        );
+        return getBalances(currentAccount.client, currentAccount.accountId);
       }
     }
   );
@@ -32,7 +28,7 @@ const Account: React.FunctionComponent = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return <Layout>-{JSON.stringify(balances)}</Layout>;
+  return <Layout>{JSON.stringify(balances)}</Layout>;
 };
 
 export default Account;
