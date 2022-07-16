@@ -122,25 +122,29 @@ const Account: React.FunctionComponent = () => {
                   </div>
                 </dd>
               </div>
-              {Array.from(balances?.tokens || []).map(([id, balance]) => (
-                <div className="px-4 py-5 sm:p-6">
-                  <dt className="text-base font-normal text-gray-900">
-                    {wallet.tokens?.[id.toString()]?.name || "Untitled Token"}
-                  </dt>
-                  <dd className="mt-1 flex justify-between items-baseline md:block lg:flex">
-                    <div className="flex items-baseline text-2xl font-semibold text-indigo-600">
-                      {balance.toString()}{" "}
-                      {wallet.tokens?.[id.toString()]?.symbol}
-                    </div>
+              {Array.from(balances?.tokens || []).map(
+                ([id, balance]) =>
+                  wallet.tokens?.[id.toString()] && (
+                    <div className="px-4 py-5 sm:p-6">
+                      <dt className="text-base font-normal text-gray-900">
+                        {wallet.tokens?.[id.toString()]?.name ||
+                          "Untitled Token"}
+                      </dt>
+                      <dd className="mt-1 flex justify-between items-baseline md:block lg:flex">
+                        <div className="flex items-baseline text-2xl font-semibold text-indigo-600">
+                          {balance.toString()}{" "}
+                          {wallet.tokens?.[id.toString()]?.symbol}
+                        </div>
 
-                    <div>
-                      <button className="inline-flex items-center shadow-sm px-2.5 py-0.5 border border-gray-300 text-sm leading-5 font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50">
-                        Send
-                      </button>
+                        <div>
+                          <button className="inline-flex items-center shadow-sm px-2.5 py-0.5 border border-gray-300 text-sm leading-5 font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50">
+                            Send
+                          </button>
+                        </div>
+                      </dd>
                     </div>
-                  </dd>
-                </div>
-              ))}
+                  )
+              )}
             </dl>
           </div>
         </div>
