@@ -43,6 +43,7 @@ const Account: React.FunctionComponent = () => {
     if (tokenId === "HBAR") {
       setCurrentToken({
         tokenId,
+        // eslint-disable-next-line no-useless-escape
         balance: Number(balances?.hbars.toString().replace(/[^0-9\.]+/g, "")),
         name: "HBAR",
         symbol: balances?.hbars.toString().split(" ")[1] || "ℏ",
