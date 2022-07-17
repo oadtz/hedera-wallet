@@ -1,17 +1,21 @@
 import classNames from "classnames";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "react-query";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import Layout from "../components/Layout";
+import SendToken from "../components/SendToken";
 import { useAppContext } from "../context/AppContext";
 import { getBalances, getTokenInfo } from "../services/hedera";
+import { HederaTokenBalance } from "../types";
 
 const Account: React.FunctionComponent = () => {
   const navigate = useNavigate();
   const { wallet, addToken } = useAppContext();
   const { accountId } = useParams();
+  const [isSendTokenOpen, setIsSendTokenOpen] = useState(false);
+  const [currentToken, setCurrentToken] = useState({} as HederaTokenBalance);
 
-  const { data: balances } = useQuery(
+  const { data: balances, refetch: getAccountBalances } = useQuery(
     ["account-balances", { accountId }],
     () => {
       if (accountId && accountId in wallet.accounts) {
@@ -33,6 +37,31 @@ const Account: React.FunctionComponent = () => {
 
       await addToken({ tokenId: tokenId.toString(), name, symbol });
     }
+  };
+
+  const handleOnSendClick = (tokenId: string) => {
+    if (tokenId === "HBAR") {
+      setCurrentToken({
+        tokenId,
+        balance: Number(balances?.hbars.toString().replace(/[^0-9\.]+/g, "")),
+        name: "HBAR",
+        symbol: balances?.hbars.toString().split(" ")[1] || "ℏ",
+      });
+    } else {
+      setCurrentToken({
+        tokenId,
+        balance: Number(balances?.tokens?.get(tokenId.toString())),
+        name: wallet.tokens[tokenId].name,
+        symbol: wallet.tokens[tokenId].symbol,
+      });
+    }
+
+    setIsSendTokenOpen(true);
+  };
+
+  const handleTokenSent = () => {
+    setIsSendTokenOpen(false);
+    getAccountBalances();
   };
 
   useEffect(() => {
@@ -116,7 +145,10 @@ const Account: React.FunctionComponent = () => {
                   </div>
 
                   <div>
-                    <button className="inline-flex items-center shadow-sm px-2.5 py-0.5 border border-gray-300 text-sm leading-5 font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50">
+                    <button
+                      className="inline-flex items-center shadow-sm px-2.5 py-0.5 border border-gray-300 text-sm leading-5 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                      onClick={() => handleOnSendClick("HBAR")}
+                    >
                       Send
                     </button>
                   </div>
@@ -137,7 +169,10 @@ const Account: React.FunctionComponent = () => {
                         </div>
 
                         <div>
-                          <button className="inline-flex items-center shadow-sm px-2.5 py-0.5 border border-gray-300 text-sm leading-5 font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50">
+                          <button
+                            className="inline-flex items-center shadow-sm px-2.5 py-0.5 border border-gray-300 text-sm leading-5 font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50"
+                            onClick={() => handleOnSendClick(id.toString())}
+                          >
                             Send
                           </button>
                         </div>
@@ -149,6 +184,16 @@ const Account: React.FunctionComponent = () => {
           </div>
         </div>
       </div>
+      {balances && currentToken && accountId && (
+        <SendToken
+          client={wallet.accounts[accountId].client}
+          senderId={accountId}
+          token={currentToken}
+          isOpen={isSendTokenOpen}
+          setIsOpen={setIsSendTokenOpen}
+          onSent={handleTokenSent}
+        />
+      )}
     </Layout>
   );
 };

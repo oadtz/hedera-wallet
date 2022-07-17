@@ -2,8 +2,10 @@ import {
   AccountBalanceQuery,
   AccountId,
   Client,
+  Hbar,
   PrivateKey,
   TokenInfoQuery,
+  TransferTransaction,
 } from "@hashgraph/sdk";
 
 export const getClient = (
@@ -35,4 +37,29 @@ export const getTokenInfo = async (client: Client, tokenId: string) => {
   const token = await query.execute(client);
 
   return token;
+};
+
+export const transferToken = async (
+  client: Client,
+  senderId: string,
+  recipientId: string,
+  tokenId: string,
+  amount: number
+) => {
+  let transaction;
+  if (tokenId === "HBAR") {
+    transaction = new TransferTransaction()
+      .addHbarTransfer(senderId, new Hbar(-amount))
+      .addHbarTransfer(recipientId, new Hbar(amount));
+  } else {
+    transaction = new TransferTransaction()
+      .addTokenTransfer(tokenId, senderId, -amount)
+      .addTokenTransfer(tokenId, recipientId, amount);
+  }
+
+  const txResponse = await transaction.execute(client);
+
+  const receipt = await txResponse.getReceipt(client);
+
+  return receipt;
 };

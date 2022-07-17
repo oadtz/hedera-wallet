@@ -17,3 +17,10 @@ export type HederaToken = {
   name: string;
   symbol: string;
 };
+
+export type HederaTokenBalance = {
+  tokenId: string;
+  name: string;
+  symbol: string;
+  balance: number;
+};
